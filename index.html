@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAL MODS PREDICTION</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            
+            background-size: 600px;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            color: #fff;
+        }
+        
+video#bg-video {
+    position: absolute;
+    top: 60%;
+    right: 50%;
+    left: 15%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: 1075px;
+    z-index: -1;
+    transform: translate(-50%, -50%);
+    background-size: cover;
+    filter: brightness(0.7);
+}
+        h1, h2 {
+            color: #00BCD4;
+            text-align: center;
+            margin-top: 20px;
+            text-shadow: 0 0 10px rgba(2, 119, 189, 1); /* Glowing effect */
+        }
+        
+        .card {
+            max-width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: rgba(68, 68, 68, 0.8); /* Semi-transparent background */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow for glow effect */
+            border: 2px solid #00BCD4; /* Added border color */
+        }
+        #currentPredictionCard {
+            text-align: center;
+            background-color: rgba(85, 85, 85, 0.8); /* Semi-transparent background */
+            border: 2px solid #00BCD4; /* Added border color */
+        }
+        #currentPredictionCard h2 {
+            margin: 0;
+            color: #00BCD4;
+            text-shadow: 0 0 10px rgba(2, 119, 189, 1); /* Glowing effect */
+        }
+        #dataTable, #predictionHistoryTable {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow for glow effect */
+            background-color: rgba(85, 85, 85, 0.8); /* Semi-transparent background */
+            border: 2px solid #00BCD4; /* Added border color */
+        }
+        .telegram-button {
+            display: block;
+            margin: 20px auto;
+            width: 150px;
+            height: 50px;
+            background-color: #0088cc;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #666;
+        }
+        th {
+            background-color: #00BCD4;
+            color: black;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(2, 119, 189, 1); /* Glowing effect */
+        }
+        td {
+            background-color: #666;
+        }
+        tr:nth-child(even) td {
+            background-color: #777;
+        }
+        tr:hover td {
+            background-color: #888;
+        }
+        #predictionChart {
+            width: 100%;
+            height: 250px; /* Fixed height */
+            border: 2px solid #00BCD4; /* Added border color */
+            border-radius: 8px;
+            background-color: rgba(85, 85, 85, 0.8); /* Semi-transparent background */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow for glow effect */
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #00BCD4;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow for glow effect */
+        }
+        .pagination button:hover {
+            background-color: #e6b800;
+            transform: scale(1.05);
+        }
+        .pagination button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #timeRemaining {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(2, 119, 189, 1); /* Glowing effect */
+        }
+        #predictionProbability, #predictedNumber, #predictedPremium {
+            font-size: 18px;
+            text-align: center;
+            margin: 10px 0;
+            text-shadow: 0 0 5px rgba(2, 119, 189, 1); /* Glowing effect */
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .button-group button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow for glow effect */
+        }
+        .button-group .green {
+            background-color: #28a745;
+            color: white;
+        }
+        .button-group .violet {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .button-group .red {
+            background-color: #dc3545;
+            color: white;
+        }
+        .button-group button:hover {
+            transform: scale(1.05);
+        }
+        .container {
+            background-color: ; /* Semi-transparent background */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow for glow effect */
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .period {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00BCD4; /* Yellow color for Period */
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(2, 119, 189, 1); /* Glowing effect */
+        }
+        
+        .next-period {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745; /* Green color for Next Period */
+            text-shadow: 0 0 5px rgba(40, 167, 69, 0.8); /* Glowing effect */
+        }
+        
+        @media (max-width: 768px) {
+            .card {
+                padding: 15px;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            #timeRemaining {
+                font-size: 20px;
+            }
+            #predictionProbability, #predictedNumber, #predictedPremium {
+                font-size: 16px;
+                font-weight: bold;
+                color: greenyellow;
+            }
+            #predictionChart {
+                height: 200px; /* Adjusted height for mobile */
+            }
+        }
+        @media (max-width: 480px) {
+            th, td {
+                font-size: 12px;
+            }
+            #timeRemaining {
+                font-size: 18px;
+            }
+            #predictionProbability, #predictedNumber, #predictedPremium {
+                font-size: 25px;
+                color: white;
+            }
+            #predictionChart {
+                height: 180px; /* Further adjustment for very small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+  <video autoplay muted loop id="bg-video">
+    <source src="bg.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+</video>
+    <h1>KAL MODS PREDICTION</h1>
+    <div id="currentPredictionCard" class="card">
+        <h2>Current Prediction</h2>
+        <div class="container">
+            <div class="period">Period: Loading...</div>
+             <p id="predictedNumber">Current: --</p>
+            <div id="nextPeriod" class="next-period">Next : -- (Loading..)</div>
+        </div>
+      
+    </div>
+
+    <div class="card">
+        <h2>Timer</h2>
+        <p id="timeRemaining">--:--</p>
+    </div>
+    <div class="card">
+        <h2>Latest Data</h2>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Issue Number</th>
+                    <th>Number</th>
+                    <th>Colour</th>
+                    <th>Premium</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+    <!--div class="card">
+        <h2>Prediction History</h2>
+        <table id="predictionHistoryTable">
+            <thead>
+                <tr>
+                    <th>Issue Number</th>
+                    <th>Predicted Number</th>
+                    <th>Actual Number</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- History rows will be inserted here -->
+            </tbody>
+        </table>
+        <!--div class="pagination">
+            <button id="prevPage">Previous</button>
+            <button id="nextPage">Next</button>
+        </div>
+    </div-->
+    <!--div class="card">
+        <h2>Prediction Chart</h2>
+        <canvas id="predictionChart"></canvas>
+    </div-->
+    <script src="scrippt.js"></script>
+    
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const periodElement = document.querySelector('.period');
+    const nextPeriodElement = document.getElementById('nextPeriod');
+    let currentIssueNumber = null;
+
+    const fetchGameIssue = () => {
+        const requestData = {
+            typeId: 1,
+            language: 0,
+            random: "e7fe6c090da2495ab8290dac551ef1ed",
+            signature: "1F390E2B2D8A55D693E57FD905AE73A7",
+            timestamp: 1723726679
+        };
+
+        return fetch('https://api.bdg88zf.com/api/webapi/GetGameIssue', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Accept': 'application/json, text/plain, */*'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .catch(error => console.error('Error fetching game issue:', error));
+    };
+
+    const updatePeriod = () => {
+        fetchGameIssue()
+            .then(data => {
+                if (!data.data) {
+                    console.error('No data received for game issue.');
+                    return;
+                }
+
+                const newIssueNumber = data.data.issueNumber;
+                if (currentIssueNumber !== newIssueNumber) {
+                    currentIssueNumber = newIssueNumber;
+                    periodElement.textContent = `Period: ${currentIssueNumber}`;
+
+                    // Check if nextPeriodNumber exists in localStorage
+                    let nextPeriodNumber = localStorage.getItem('nextPeriodNumber');
+                    if (nextPeriodNumber !== (parseInt(newIssueNumber) + 1).toString()) {
+                        nextPeriodNumber = parseInt(newIssueNumber) + 1;
+                        const isSmall = Math.random() < 0.5;
+                        const prediction = isSmall ? 'Small' : 'Big';
+                        const randomNumber = isSmall
+                            ? Math.floor(Math.random() * 5) // Random number between 0-4 for Small
+                            : Math.floor(Math.random() * 5) + 5; // Random number between 5-9 for Big
+
+                        // Store in localStorage
+                        localStorage.setItem('nextPeriodNumber', nextPeriodNumber);
+                        localStorage.setItem('prediction', prediction);
+                        localStorage.setItem('randomNumber', randomNumber);
+                    }
+
+                    nextPeriodElement.textContent = `Next Period: ${nextPeriodNumber} (${localStorage.getItem('prediction')} ${localStorage.getItem('randomNumber')})`;
+                }
+            })
+            .catch(error => console.error('Error fetching new issue:', error));
+    };
+
+    const fetchLatestData = () => {
+        return fetch('https://api.bdg88zf.com/api/webapi/GetLatestData', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Accept': 'application/json, text/plain, */*'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .catch(error => console.error('Error fetching latest data:', error));
+    };
+
+    const updateLatestData = () => {
+        fetchLatestData()
+            .then(data => {
+                if (!data.data) {
+                    console.error('No data received for latest data.');
+                    return;
+                }
+
+                const tableBody = document.querySelector('#dataTable tbody');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                data.data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.issueNumber}</td>
+                        <td>${item.number}</td>
+                        <td>${item.color}</td>
+                        <td>${item.premium}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error updating latest data:', error));
+    };
+
+    const fetchPredictionHistory = (page = 1) => {
+        return fetch('https://api.bdg88zf.com/api/webapi/GetPredictionHistory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Accept': 'application/json, text/plain, */*'
+            },
+            body: JSON.stringify({ page: page })
+        })
+        .then(response => response.json())
+        .catch(error => console.error('Error fetching prediction history:', error));
+    };
+
+    const updatePredictionHistory = (page = 1) => {
+        fetchPredictionHistory(page)
+            .then(data => {
+                if (!data.data) {
+                    console.error('No data received for prediction history.');
+                    return;
+                }
+
+                const tableBody = document.querySelector('#predictionHistoryTable tbody');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                data.data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.issueNumber}</td>
+                        <td>${item.predictedNumber}</td>
+                        <td>${item.actualNumber}</td>
+                        <td>${item.result}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error updating prediction history:', error));
+    };
+
+    const updatePredictionChart = () => {
+        return fetch('https://api.bdg88zf.com/api/webapi/GetPredictionChart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Accept': 'application/json, text/plain, */*'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            const chartData = data.data;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(item => item.period),
+                    datasets: [{
+                        label: 'Predicted Numbers',
+                        data: chartData.map(item => item.value),
+                        borderColor: '#00BCD4',
+                        backgroundColor: 'rgba(255, 204, 0, 0.2)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { beginAtZero: true },
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error updating prediction chart:', error));
+    };
+
+    const updateTimer = () => {
+        const now = new Date();
+        const nextUpdateTime = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes later
+        const timeRemaining = nextUpdateTime - now;
+
+        const minutes = Math.floor(timeRemaining / 60000);
+        const seconds = Math.floor((timeRemaining % 60000) / 1000);
+        document.getElementById('timeRemaining').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
+
+    const init = () => {
+        updatePeriod();
+        updateLatestData();
+        updatePredictionHistory();
+        updatePredictionChart();
+        updateTimer();
+        
+        setInterval(() => {
+            updatePeriod();
+            updateLatestData();
+            updatePredictionHistory();
+            updatePredictionChart();
+            updateTimer();
+        }, 3 * 60 * 1000); // Update every 3 minutes
+    };
+
+    init();
+});
+    </script>
+</body>
+</html>
